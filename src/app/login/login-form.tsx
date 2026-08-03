@@ -71,6 +71,7 @@ export default function LoginForm() {
         ) : (
           <form action={signUp} className="flex flex-col gap-4">
             <Field label="이름" name="displayName" type="text" required />
+            <Field label="닉네임" name="nickname" type="text" required />
             <Field label="이메일" name="email" type="email" required />
             <Field
               label="비밀번호"
