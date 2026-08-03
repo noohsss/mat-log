@@ -24,15 +24,39 @@ export async function getRestaurants({
 }: RestaurantFilters = {}) {
   const supabase = await createClient();
 
-  const needsTagJoin = Boolean(topic || target);
-  const tagsSelect = needsTagJoin ? "restaurant_tags!inner(tags!inner(name, type))" : "restaurant_tags(tags(name, type))";
+  // Filtering by topic AND target tags can't be done with a single embedded
+  // join filter (PostgREST would require one restaurant_tags row to match both
+  // tag names at once). Resolve each tag filter to a restaurant id set first,
+  // then intersect them.
+  let tagFilterIds: string[] | undefined;
+  if (topic || target) {
+    const idSets: Set<string>[] = [];
+
+    for (const [name, type] of [
+      [topic, "topic"],
+      [target, "target"],
+    ] as const) {
+      if (!name) continue;
+      const { data: tagMatches, error: tagError } = await supabase
+        .from("restaurant_tags")
+        .select("restaurant_id, tags!inner(name, type)")
+        .eq("tags.name", name)
+        .eq("tags.type", type);
+      if (tagError) throw tagError;
+      idSets.push(new Set((tagMatches ?? []).map((r) => r.restaurant_id)));
+    }
+
+    tagFilterIds = [...idSets.reduce((a, b) => new Set([...a].filter((id) => b.has(id))))];
+    if (tagFilterIds.length === 0) return [];
+  }
 
   let query = supabase
     .from("restaurants")
     .select(
-      `id, user_id, name, region, food_type, price_range, rating, memo, visited, created_at, users(nickname), ${tagsSelect}`
+      "id, user_id, name, region, food_type, price_range, rating, memo, visited, created_at, users(nickname), restaurant_tags(tags(name, type))"
     );
 
+  if (tagFilterIds) query = query.in("id", tagFilterIds);
   if (onlyUserId) query = query.eq("user_id", onlyUserId);
   if (excludeUserId) {
     query = query.neq("user_id", excludeUserId);
@@ -52,8 +76,6 @@ export async function getRestaurants({
   if (foodType) query = query.eq("food_type", foodType);
   if (region) query = query.eq("region", region);
   if (q) query = query.or(`name.ilike.%${q}%,memo.ilike.%${q}%`);
-  if (topic) query = query.eq("restaurant_tags.tags.name", topic).eq("restaurant_tags.tags.type", "topic");
-  if (target) query = query.eq("restaurant_tags.tags.name", target).eq("restaurant_tags.tags.type", "target");
 
   if (sort === "rating") {
     query = query.order("rating", { ascending: false, nullsFirst: false });
