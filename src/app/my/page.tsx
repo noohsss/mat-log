@@ -1,18 +1,20 @@
 import Link from "next/link";
+import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
-import { signOut } from "./login/actions";
-import { getRestaurants } from "./restaurants/queries";
-import { RestaurantList } from "./restaurants/restaurant-list";
+import { signOut } from "../login/actions";
+import { getRestaurants } from "../restaurants/queries";
+import { RestaurantList } from "../restaurants/restaurant-list";
 import { Logo } from "@/components/logo";
 import { BoardTabs } from "@/components/board-tabs";
 
-export default async function Home() {
+export default async function MyRestaurantsPage() {
   const supabase = await createClient();
   const {
     data: { user },
   } = await supabase.auth.getUser();
+  if (!user) redirect("/login");
 
-  const restaurants = await getRestaurants();
+  const restaurants = await getRestaurants({ onlyUserId: user.id });
 
   return (
     <div className="flex flex-col flex-1 items-center bg-[#fdf6f1] font-sans">
@@ -44,8 +46,8 @@ export default async function Home() {
 
         <RestaurantList
           restaurants={restaurants}
-          currentUserId={user?.id}
-          emptyMessage="아직 등록된 맛집이 없어요. 첫 맛집을 등록해보세요!"
+          currentUserId={user.id}
+          emptyMessage="아직 등록한 맛집이 없어요. 첫 맛집을 등록해보세요!"
         />
       </main>
     </div>
