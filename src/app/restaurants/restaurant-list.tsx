@@ -48,15 +48,17 @@ export function RestaurantList({
               <p className="text-xs text-zinc-400">
                 {author ?? "익명"} · {createdAt}
               </p>
-              <span
-                className={`rounded-full px-2 py-0.5 text-xs font-medium ${
-                  r.visited
-                    ? "bg-emerald-50 text-emerald-600"
-                    : "bg-amber-50 text-amber-600"
-                }`}
-              >
-                {r.visited ? "방문함" : "방문 안함"}
-              </span>
+              {isOwner && (
+                <span
+                  className={`rounded-full px-2 py-0.5 text-xs font-medium ${
+                    r.visited
+                      ? "bg-emerald-50 text-emerald-600"
+                      : "bg-amber-50 text-amber-600"
+                  }`}
+                >
+                  {r.visited ? "방문함" : "방문 안함"}
+                </span>
+              )}
             </div>
             <div className="mt-2 flex flex-wrap gap-2 text-xs font-medium text-zinc-600">
               {r.region && (

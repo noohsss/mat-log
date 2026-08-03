@@ -57,8 +57,6 @@ export async function getRestaurants({
 
   if (sort === "rating") {
     query = query.order("rating", { ascending: false, nullsFirst: false });
-  } else if (sort === "price") {
-    query = query.order("price_range", { ascending: true });
   } else {
     query = query.order("created_at", { ascending: false });
   }
