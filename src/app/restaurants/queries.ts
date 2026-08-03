@@ -3,6 +3,7 @@ import type { SortValue } from "./constants";
 
 export type RestaurantFilters = {
   onlyUserId?: string;
+  excludeUserId?: string;
   q?: string;
   topic?: string;
   target?: string;
@@ -13,6 +14,7 @@ export type RestaurantFilters = {
 
 export async function getRestaurants({
   onlyUserId,
+  excludeUserId,
   q,
   topic,
   target,
@@ -28,10 +30,25 @@ export async function getRestaurants({
   let query = supabase
     .from("restaurants")
     .select(
-      `id, user_id, name, region, food_type, price_range, rating, memo, created_at, users(nickname), ${tagsSelect}`
+      `id, user_id, name, region, food_type, price_range, rating, memo, visited, created_at, users(nickname), ${tagsSelect}`
     );
 
   if (onlyUserId) query = query.eq("user_id", onlyUserId);
+  if (excludeUserId) {
+    query = query.neq("user_id", excludeUserId);
+
+    const { data: savedRows } = await supabase
+      .from("restaurants")
+      .select("source_restaurant_id")
+      .eq("user_id", excludeUserId)
+      .not("source_restaurant_id", "is", null);
+    const savedIds = (savedRows ?? [])
+      .map((r) => r.source_restaurant_id)
+      .filter((id): id is string => !!id);
+    if (savedIds.length > 0) {
+      query = query.not("id", "in", `(${savedIds.join(",")})`);
+    }
+  }
   if (foodType) query = query.eq("food_type", foodType);
   if (region) query = query.eq("region", region);
   if (q) query = query.or(`name.ilike.%${q}%,memo.ilike.%${q}%`);

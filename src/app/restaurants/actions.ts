@@ -74,6 +74,7 @@ function readForm(formData: FormData) {
     memo: (formData.get("memo") as string) || null,
     topicTags: (formData.get("topicTags") as string) ?? "",
     targetTags: (formData.get("targetTags") as string) ?? "",
+    visited: formData.get("visited") === "on",
   };
 }
 
@@ -84,12 +85,12 @@ export async function createRestaurant(formData: FormData) {
   } = await supabase.auth.getUser();
   if (!user) redirect("/login");
 
-  const { name, region, food_type, price_range, rating, memo, topicTags, targetTags } =
+  const { name, region, food_type, price_range, rating, memo, topicTags, targetTags, visited } =
     readForm(formData);
 
   const { data, error } = await supabase
     .from("restaurants")
-    .insert({ user_id: user.id, name, region, food_type, price_range, rating, memo })
+    .insert({ user_id: user.id, name, region, food_type, price_range, rating, memo, visited })
     .select("id")
     .single();
 
@@ -113,7 +114,7 @@ export async function updateRestaurant(id: string, formData: FormData) {
   } = await supabase.auth.getUser();
   if (!user) redirect("/login");
 
-  const { name, region, food_type, price_range, rating, memo, topicTags, targetTags } =
+  const { name, region, food_type, price_range, rating, memo, topicTags, targetTags, visited } =
     readForm(formData);
 
   const { error } = await supabase
@@ -125,6 +126,7 @@ export async function updateRestaurant(id: string, formData: FormData) {
       price_range,
       rating,
       memo,
+      visited,
       updated_at: new Date().toISOString(),
     })
     .eq("id", id)
@@ -136,6 +138,54 @@ export async function updateRestaurant(id: string, formData: FormData) {
 
   revalidatePath("/");
   redirect("/");
+}
+
+export async function saveRestaurant(formData: FormData) {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) redirect("/login");
+
+  const restaurantId = formData.get("restaurantId") as string;
+
+  const { data: source, error } = await supabase
+    .from("restaurants")
+    .select("name, region, food_type, price_range, rating, memo, restaurant_tags(tag_id)")
+    .eq("id", restaurantId)
+    .single();
+  if (error || !source) throw error ?? new Error("맛집을 찾을 수 없습니다.");
+
+  const { data: inserted, error: insertError } = await supabase
+    .from("restaurants")
+    .insert({
+      user_id: user.id,
+      name: source.name,
+      region: source.region,
+      food_type: source.food_type,
+      price_range: source.price_range,
+      rating: source.rating,
+      memo: source.memo,
+      visited: false,
+      source_restaurant_id: restaurantId,
+    })
+    .select("id")
+    .single();
+  if (insertError) throw insertError;
+
+  const tagIds = (source.restaurant_tags as unknown as { tag_id: string }[]).map(
+    (t) => t.tag_id
+  );
+  if (tagIds.length > 0) {
+    const { error: linkError } = await supabase
+      .from("restaurant_tags")
+      .insert(tagIds.map((tag_id) => ({ restaurant_id: inserted.id, tag_id })));
+    if (linkError) throw linkError;
+  }
+
+  revalidatePath("/");
+  revalidatePath("/my");
+  redirect("/my");
 }
 
 export async function deleteRestaurant(formData: FormData) {

@@ -14,6 +14,7 @@ type RestaurantFormValues = {
   memo?: string | null;
   topicTags?: string;
   targetTags?: string;
+  visited?: boolean;
 };
 
 export function RestaurantForm({
@@ -80,6 +81,20 @@ export function RestaurantForm({
           placeholder="친구, 가족 (쉼표로 구분)"
         />
       </div>
+
+      <label className="flex cursor-pointer items-center gap-3 text-sm">
+        <input
+          type="checkbox"
+          name="visited"
+          defaultChecked={initialValues?.visited ?? true}
+          className="peer sr-only"
+        />
+        <span className="relative inline-flex h-6 w-11 shrink-0 items-center rounded-full bg-zinc-300 transition-colors peer-checked:bg-[#ff6a3d]">
+          <span className="inline-block h-5 w-5 translate-x-0.5 rounded-full bg-white shadow-sm transition-transform peer-checked:translate-x-5" />
+        </span>
+        <span className="font-medium text-zinc-700 peer-checked:hidden">방문 안함</span>
+        <span className="hidden font-medium text-zinc-700 peer-checked:inline">방문함</span>
+      </label>
 
       <label className="flex flex-col gap-1.5 text-sm">
         <span className="font-medium text-zinc-700">메모</span>

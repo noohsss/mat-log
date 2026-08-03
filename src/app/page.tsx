@@ -26,7 +26,7 @@ export default async function Home({
 
   const filters = parseFilters(await searchParams);
   const [restaurants, { regions, topics, targets }] = await Promise.all([
-    getRestaurants(filters),
+    getRestaurants({ ...filters, excludeUserId: user?.id }),
     getFilterOptions(),
   ]);
 
@@ -71,7 +71,7 @@ export default async function Home({
         <RestaurantList
           restaurants={restaurants}
           currentUserId={user?.id}
-          emptyMessage="조건에 맞는 맛집이 없어요."
+          emptyMessage="다른 사용자가 등록한 맛집이 아직 없어요."
         />
       </main>
     </div>
