@@ -1,5 +1,7 @@
 "use client";
 
+import { SubmitButton } from "@/components/submit-button";
+
 const FOOD_TYPES = ["한식", "중식", "일식", "양식", "카페·디저트", "술집·바", "기타"];
 const PRICE_RANGES = ["저렴", "보통", "비쌈"];
 
@@ -29,7 +31,7 @@ export function RestaurantForm({
         기록한 정보는 추천 게시판에 자동으로 공개됩니다.
       </p>
 
-      <Field label="이름" name="name" defaultValue={initialValues?.name} required />
+      <Field label="가게명" name="name" defaultValue={initialValues?.name} required />
       <Field
         label="지역·위치"
         name="region"
@@ -92,16 +94,16 @@ export function RestaurantForm({
       <div className="mt-2 flex justify-end gap-3">
         <a
           href="/"
-          className="flex h-11 items-center rounded-full border border-black/10 px-5 text-sm font-medium text-black transition-colors hover:bg-black/[.04]"
+          className="flex h-11 cursor-pointer items-center rounded-full bg-zinc-100 px-5 text-sm font-medium text-zinc-600 transition-colors hover:bg-zinc-200 hover:text-black"
         >
           취소
         </a>
-        <button
-          type="submit"
-          className="h-11 rounded-full bg-foreground px-6 text-sm font-medium text-background transition-colors hover:bg-[#383838]"
+        <SubmitButton
+          pendingLabel={`${submitLabel} 중...`}
+          className="h-11 rounded-full bg-[#ff6a3d] px-6 text-sm font-medium text-white shadow-sm transition-colors hover:bg-[#e85a2f] disabled:cursor-not-allowed disabled:opacity-60"
         >
           {submitLabel}
-        </button>
+        </SubmitButton>
       </div>
     </form>
   );
