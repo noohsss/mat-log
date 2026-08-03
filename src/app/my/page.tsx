@@ -1,20 +1,36 @@
+import { Suspense } from "react";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { signOut } from "../login/actions";
-import { getRestaurants } from "../restaurants/queries";
+import {
+  getRestaurants,
+  getFilterOptions,
+  parseFilters,
+  countAppliedFilters,
+  type SearchParams,
+} from "../restaurants/queries";
 import { RestaurantList } from "../restaurants/restaurant-list";
 import { Logo } from "@/components/logo";
 import { BoardTabs } from "@/components/board-tabs";
+import { FilterBar } from "@/components/filter-bar";
 
-export default async function MyRestaurantsPage() {
+export default async function MyRestaurantsPage({
+  searchParams,
+}: {
+  searchParams: Promise<SearchParams>;
+}) {
   const supabase = await createClient();
   const {
     data: { user },
   } = await supabase.auth.getUser();
   if (!user) redirect("/login");
 
-  const restaurants = await getRestaurants({ onlyUserId: user.id });
+  const filters = parseFilters(await searchParams);
+  const [restaurants, { regions, topics, targets }] = await Promise.all([
+    getRestaurants({ ...filters, onlyUserId: user.id }),
+    getFilterOptions(),
+  ]);
 
   return (
     <div className="flex flex-col flex-1 items-center bg-[#fdf6f1] font-sans">
@@ -44,10 +60,20 @@ export default async function MyRestaurantsPage() {
           </Link>
         </div>
 
+        <Suspense>
+          <FilterBar
+            regions={regions}
+            topics={topics}
+            targets={targets}
+            totalCount={restaurants.length}
+            appliedCount={countAppliedFilters(filters)}
+          />
+        </Suspense>
+
         <RestaurantList
           restaurants={restaurants}
           currentUserId={user.id}
-          emptyMessage="아직 등록한 맛집이 없어요. 첫 맛집을 등록해보세요!"
+          emptyMessage="조건에 맞는 맛집이 없어요."
         />
       </main>
     </div>
