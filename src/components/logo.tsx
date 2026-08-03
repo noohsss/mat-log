@@ -24,17 +24,23 @@ export function LogoMark({ className }: { className?: string }) {
 
       {/* fork */}
       <g fill="#fff6ef">
-        <rect x="26" y="16" width="3" height="14" rx="1.5" />
-        <rect x="31" y="16" width="3" height="14" rx="1.5" />
-        <rect x="36" y="16" width="3" height="14" rx="1.5" />
-        <rect x="26" y="27" width="13" height="6" rx="3" />
-        <rect x="30.5" y="31" width="4" height="19" rx="2" />
+        <rect x="27" y="16" width="2" height="12" rx="1" />
+        <rect x="30" y="16" width="2" height="12" rx="1" />
+        <rect x="33" y="16" width="2" height="12" rx="1" />
+        <rect x="26" y="26" width="10" height="5" rx="2.5" />
+        <rect x="29.5" y="30" width="3" height="20" rx="1.5" />
+      </g>
+
+      {/* knife */}
+      <g fill="#fff6ef">
+        <path d="M40 30V15C40 12 41.5 12 43 12C45.5 12.5 46 14.5 45 18V30H40Z" />
+        <rect x="41" y="30" width="3" height="19" rx="1.5" />
       </g>
 
       {/* spoon */}
       <g fill="#fff6ef">
-        <ellipse cx="54" cy="24" rx="7" ry="9" />
-        <rect x="52" y="31" width="4" height="19" rx="2" />
+        <ellipse cx="55" cy="24" rx="6" ry="8" />
+        <rect x="53" y="32" width="4" height="18" rx="2" />
       </g>
     </svg>
   );
