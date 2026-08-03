@@ -48,8 +48,8 @@ Claude가 제안하고 사용자가 검토하여 확정한 스키마.
 | 컬럼 | 타입 | 설명 |
 |---|---|---|
 | id | uuid (PK, = auth.users.id) | |
-| display_name | varchar(100) | 가입 시 입력한 이름 |
-| avatar_url | varchar(500) | 프로필 사진 URL (MVP 미사용) |
+| email | varchar(255) | auth.users.email 복사본 (게시판 등에서 조회용) |
+| nickname | varchar(50) | 게시판에 노출되는 닉네임 |
 | created_at | timestamptz | |
 
 ### restaurants
