@@ -1,37 +1,64 @@
+import { Jua } from "next/font/google";
+
+const jua = Jua({ weight: "400", subsets: ["latin"], display: "swap" });
+
 export function LogoMark({ className }: { className?: string }) {
   return (
     <svg
-      viewBox="0 0 64 64"
+      viewBox="0 0 80 60"
       className={className}
       xmlns="http://www.w3.org/2000/svg"
       aria-hidden="true"
     >
       {/* spiral binder rings */}
-      <rect x="6" y="14" width="10" height="5" rx="2.5" fill="#2b2b2b" />
-      <rect x="6" y="29.5" width="10" height="5" rx="2.5" fill="#2b2b2b" />
-      <rect x="6" y="45" width="10" height="5" rx="2.5" fill="#2b2b2b" />
+      <rect x="3" y="13" width="12" height="5" rx="2.5" fill="#3a2f28" />
+      <rect x="3" y="27.5" width="12" height="5" rx="2.5" fill="#3a2f28" />
+      <rect x="3" y="42" width="12" height="5" rx="2.5" fill="#3a2f28" />
 
-      {/* notebook page with folded corner */}
+      {/* notebook cover with folded corner (wider) */}
       <path
-        d="M16 8a4 4 0 0 1 4-4h22l8 8v44a4 4 0 0 1-4 4H20a4 4 0 0 1-4-4V8Z"
-        fill="#f2542d"
+        d="M22 6H60L74 20V46A8 8 0 0 1 66 54H22A8 8 0 0 1 14 46V14A8 8 0 0 1 22 6Z"
+        fill="#ff6a3d"
       />
-      <path d="M42 4l8 8h-6a2 2 0 0 1-2-2V4Z" fill="#ffffff" fillOpacity="0.55" />
+      <path d="M60 6L74 20H66A6 6 0 0 1 60 14V6Z" fill="#ffffff" fillOpacity="0.35" />
 
       {/* fork */}
-      <g fill="#fff5ee">
-        <rect x="24.2" y="20" width="1.8" height="10" rx="0.9" />
-        <rect x="27" y="20" width="1.8" height="10" rx="0.9" />
-        <rect x="29.8" y="20" width="1.8" height="10" rx="0.9" />
-        <path d="M24 29.5h7.6v2.2a3.8 3.8 0 0 1-3.8 3.8 3.8 3.8 0 0 1-3.8-3.8v-2.2Z" />
-        <rect x="26.6" y="34.5" width="2.4" height="14" rx="1.2" />
+      <g fill="#fff6ef">
+        <rect x="26" y="16" width="3" height="14" rx="1.5" />
+        <rect x="31" y="16" width="3" height="14" rx="1.5" />
+        <rect x="36" y="16" width="3" height="14" rx="1.5" />
+        <rect x="26" y="27" width="13" height="6" rx="3" />
+        <rect x="30.5" y="31" width="4" height="19" rx="2" />
       </g>
 
-      {/* spoon + speech-bubble tail */}
-      <g fill="#fff5ee">
-        <ellipse cx="38.5" cy="26" rx="5.4" ry="7.2" />
-        <path d="M38.5 33c-3.6 0-6.3 2.8-6.3 6.6 0 3.2 1.9 5.9 4.6 6.8-.3-1.6.1-3.2 1.1-4.4.6.9 1.6 1.6 2.8 1.8-.2-.9-.1-1.9.3-2.8 1.9-1.2 3.1-3.3 3.1-5.7v-.3c0-1.1-.4-2.1-1.1-2.9" />
+      {/* spoon */}
+      <g fill="#fff6ef">
+        <ellipse cx="54" cy="24" rx="7" ry="9" />
+        <rect x="52" y="31" width="4" height="19" rx="2" />
       </g>
     </svg>
+  );
+}
+
+export function Logo({
+  className,
+  markClassName,
+  textClassName,
+}: {
+  className?: string;
+  markClassName?: string;
+  textClassName?: string;
+}) {
+  return (
+    <div className={`flex items-center gap-2 ${className ?? ""}`}>
+      <LogoMark className={markClassName ?? "h-9 w-12"} />
+      <span
+        className={`${jua.className} tracking-tight text-[#2b2b2b] ${
+          textClassName ?? "text-2xl"
+        }`}
+      >
+        맛<span className="text-[#ff6a3d]">log</span>
+      </span>
+    </div>
   );
 }

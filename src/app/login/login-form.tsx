@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { signIn, signUp } from "./actions";
-import { LogoMark } from "@/components/logo";
+import { Logo } from "@/components/logo";
 
 export default function LoginForm() {
   const [mode, setMode] = useState<"signin" | "signup">("signin");
@@ -15,8 +15,7 @@ export default function LoginForm() {
     <div className="flex flex-1 items-center justify-center bg-zinc-50 px-6 py-16">
       <div className="w-full max-w-sm rounded-2xl border border-black/10 bg-white p-8">
         <div className="mb-8 flex flex-col items-center gap-3 text-center">
-          <LogoMark className="h-14 w-14" />
-          <h1 className="text-xl font-semibold text-black">맛로그</h1>
+          <Logo className="flex-col gap-2" markClassName="h-12 w-16" textClassName="text-2xl" />
           <p className="text-sm text-zinc-500">
             발견한 맛집을 기록하고 다른 사용자의 추천도 찾아보세요.
           </p>

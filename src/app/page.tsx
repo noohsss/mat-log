@@ -1,6 +1,6 @@
 import { createClient } from "@/lib/supabase/server";
 import { signOut } from "./login/actions";
-import { LogoMark } from "@/components/logo";
+import { Logo } from "@/components/logo";
 
 async function getRestaurants() {
   const supabase = await createClient();
@@ -26,10 +26,7 @@ export default async function Home() {
     <div className="flex flex-col flex-1 items-center bg-zinc-50 font-sans">
       <main className="flex w-full max-w-3xl flex-col gap-6 py-16 px-6">
         <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <LogoMark className="h-9 w-9" />
-            <h1 className="text-3xl font-semibold text-black">맛로그</h1>
-          </div>
+          <Logo markClassName="h-9 w-9" textClassName="text-2xl" />
           <form action={signOut} className="flex items-center gap-3">
             <span className="text-sm text-zinc-500">
               {user?.user_metadata?.full_name ?? user?.email}
