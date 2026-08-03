@@ -29,7 +29,11 @@ export async function signUp(formData: FormData) {
   const email = formData.get("email") as string;
   const password = formData.get("password") as string;
   const displayName = formData.get("displayName") as string;
-  const nickname = formData.get("nickname") as string;
+  const nickname = (formData.get("nickname") as string)?.trim();
+
+  if (!nickname) {
+    redirect(`/login?error=${encodeURIComponent("닉네임을 입력해주세요.")}`);
+  }
 
   const { error } = await supabase.auth.signUp({
     email,
