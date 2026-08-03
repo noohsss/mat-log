@@ -36,7 +36,7 @@ export default async function MyRestaurantsPage({
     <div className="flex flex-col flex-1 items-center bg-[#fdf6f1] font-sans">
       <main className="flex w-full max-w-3xl flex-col gap-6 py-16 px-6">
         <div className="flex items-center justify-between border-b-2 border-[#ffe3d3] pb-5">
-          <Logo markClassName="h-9 w-12" textClassName="text-2xl" />
+          <Logo markClassName="h-11 w-14" textClassName="text-2xl" />
           <form action={signOut} className="flex items-center gap-3">
             <span className="text-sm text-zinc-500">
               {user?.user_metadata?.nickname ?? user?.email}
