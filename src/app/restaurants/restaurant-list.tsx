@@ -32,6 +32,7 @@ export function RestaurantList({
         const author = (r.users as unknown as { nickname: string | null } | null)
           ?.nickname;
         const createdAt = new Date(r.created_at).toLocaleDateString("ko-KR");
+        const notYetVisited = isOwner && !r.visited;
 
         return (
           <li
@@ -40,9 +41,11 @@ export function RestaurantList({
           >
             <div className="flex items-center justify-between">
               <h2 className="text-lg font-semibold text-[#2b2b2b]">{r.name}</h2>
-              <span className="flex items-center gap-1 rounded-full bg-[#fff1ea] px-2.5 py-1 text-sm font-medium text-[#e85a2f]">
-                ★ {r.rating}
-              </span>
+              {!notYetVisited && (
+                <span className="flex items-center gap-1 rounded-full bg-[#fff1ea] px-2.5 py-1 text-sm font-medium text-[#e85a2f]">
+                  ★ {r.rating}
+                </span>
+              )}
             </div>
             <div className="mt-1 flex items-center gap-2">
               <p className="text-xs text-zinc-400">
@@ -85,8 +88,14 @@ export function RestaurantList({
                 ))}
               </p>
             )}
-            {r.memo && (
-              <p className="mt-3 text-sm leading-relaxed text-zinc-700">{r.memo}</p>
+            {notYetVisited ? (
+              <p className="mt-3 text-sm leading-relaxed text-amber-600">
+                방문 후 별점과 한줄평을 작성해주세요.
+              </p>
+            ) : (
+              r.memo && (
+                <p className="mt-3 text-sm leading-relaxed text-zinc-700">{r.memo}</p>
+              )
             )}
 
             {isOwner ? (

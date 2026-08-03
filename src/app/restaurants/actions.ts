@@ -151,7 +151,7 @@ export async function saveRestaurant(formData: FormData) {
 
   const { data: source, error } = await supabase
     .from("restaurants")
-    .select("name, region, food_type, price_range, rating, restaurant_tags(tag_id)")
+    .select("name, region, food_type, price_range, restaurant_tags(tag_id)")
     .eq("id", restaurantId)
     .single();
   if (error || !source) throw error ?? new Error("맛집을 찾을 수 없습니다.");
@@ -164,8 +164,8 @@ export async function saveRestaurant(formData: FormData) {
       region: source.region,
       food_type: source.food_type,
       price_range: source.price_range,
-      rating: source.rating,
-      memo: "맛집 방문 후 한줄평을 작성해 주세요.",
+      rating: null,
+      memo: null,
       visited: false,
       source_restaurant_id: restaurantId,
     })
