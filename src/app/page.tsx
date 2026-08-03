@@ -1,14 +1,8 @@
-import { createClient } from "@/lib/supabase";
+import { createClient } from "@/lib/supabase/server";
+import { signOut } from "./login/actions";
 
-// TEMPORARY: signs in as a seed dev account so RLS ("authenticated" role)
-// lets us read data before Google login is wired up. Remove once real auth lands.
 async function getRestaurants() {
-  const supabase = createClient();
-
-  await supabase.auth.signInWithPassword({
-    email: process.env.DEV_SEED_EMAIL!,
-    password: process.env.DEV_SEED_PASSWORD!,
-  });
+  const supabase = await createClient();
 
   const { data, error } = await supabase
     .from("restaurants")
@@ -20,14 +14,32 @@ async function getRestaurants() {
 }
 
 export default async function Home() {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
   const restaurants = await getRestaurants();
 
   return (
     <div className="flex flex-col flex-1 items-center bg-zinc-50 font-sans dark:bg-black">
       <main className="flex w-full max-w-3xl flex-col gap-6 py-16 px-6">
-        <h1 className="text-3xl font-semibold text-black dark:text-zinc-50">
-          맛집 메모장
-        </h1>
+        <div className="flex items-center justify-between">
+          <h1 className="text-3xl font-semibold text-black dark:text-zinc-50">
+            맛로그
+          </h1>
+          <form action={signOut} className="flex items-center gap-3">
+            <span className="text-sm text-zinc-500 dark:text-zinc-400">
+              {user?.user_metadata?.full_name ?? user?.email}
+            </span>
+            <button
+              type="submit"
+              className="rounded-full border border-black/10 px-4 py-2 text-sm font-medium text-black transition-colors hover:bg-black/[.04] dark:border-white/10 dark:text-zinc-50 dark:hover:bg-white/[.06]"
+            >
+              로그아웃
+            </button>
+          </form>
+        </div>
 
         <ul className="flex flex-col gap-4">
           {restaurants.map((r) => (
