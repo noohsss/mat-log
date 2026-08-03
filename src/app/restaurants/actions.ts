@@ -104,7 +104,7 @@ export async function createRestaurant(formData: FormData) {
   }
 
   revalidatePath("/");
-  redirect("/");
+  revalidatePath("/my");
 }
 
 export async function updateRestaurant(id: string, formData: FormData) {
@@ -137,7 +137,7 @@ export async function updateRestaurant(id: string, formData: FormData) {
   await replaceTags(supabase, id, topicTags, targetTags);
 
   revalidatePath("/");
-  redirect("/");
+  revalidatePath("/my");
 }
 
 export async function saveRestaurant(formData: FormData) {
@@ -151,7 +151,7 @@ export async function saveRestaurant(formData: FormData) {
 
   const { data: source, error } = await supabase
     .from("restaurants")
-    .select("name, region, food_type, price_range, rating, memo, restaurant_tags(tag_id)")
+    .select("name, region, food_type, price_range, rating, restaurant_tags(tag_id)")
     .eq("id", restaurantId)
     .single();
   if (error || !source) throw error ?? new Error("맛집을 찾을 수 없습니다.");
@@ -165,7 +165,7 @@ export async function saveRestaurant(formData: FormData) {
       food_type: source.food_type,
       price_range: source.price_range,
       rating: source.rating,
-      memo: source.memo,
+      memo: "맛집 방문 후 한줄평을 작성해 주세요.",
       visited: false,
       source_restaurant_id: restaurantId,
     })
@@ -185,7 +185,6 @@ export async function saveRestaurant(formData: FormData) {
 
   revalidatePath("/");
   revalidatePath("/my");
-  redirect("/my");
 }
 
 export async function deleteRestaurant(formData: FormData) {

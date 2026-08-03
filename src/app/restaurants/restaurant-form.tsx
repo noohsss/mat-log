@@ -1,5 +1,6 @@
 "use client";
 
+import { useRouter } from "next/navigation";
 import { SubmitButton } from "@/components/submit-button";
 
 const FOOD_TYPES = ["한식", "중식", "일식", "양식", "카페·디저트", "술집·바", "기타"];
@@ -22,12 +23,19 @@ export function RestaurantForm({
   initialValues,
   submitLabel,
 }: {
-  action: (formData: FormData) => void;
+  action: (formData: FormData) => Promise<void>;
   initialValues?: RestaurantFormValues;
   submitLabel: string;
 }) {
+  const router = useRouter();
+
+  async function handleSubmit(formData: FormData) {
+    await action(formData);
+    router.back();
+  }
+
   return (
-    <form action={action} className="flex flex-col gap-5">
+    <form action={handleSubmit} className="flex flex-col gap-5">
       <p className="rounded-lg bg-orange-50 px-3 py-2 text-sm text-orange-700">
         기록한 정보는 추천 게시판에 자동으로 공개됩니다.
       </p>
@@ -97,7 +105,7 @@ export function RestaurantForm({
       </label>
 
       <label className="flex flex-col gap-1.5 text-sm">
-        <span className="font-medium text-zinc-700">메모</span>
+        <span className="font-medium text-zinc-700">한줄평</span>
         <textarea
           name="memo"
           defaultValue={initialValues?.memo ?? ""}
@@ -107,12 +115,13 @@ export function RestaurantForm({
       </label>
 
       <div className="mt-2 flex justify-end gap-3">
-        <a
-          href="/"
+        <button
+          type="button"
+          onClick={() => router.back()}
           className="flex h-11 cursor-pointer items-center rounded-full bg-zinc-100 px-5 text-sm font-medium text-zinc-600 transition-colors hover:bg-zinc-200 hover:text-black"
         >
           취소
-        </a>
+        </button>
         <SubmitButton
           pendingLabel={`${submitLabel} 중...`}
           className="h-11 rounded-full bg-[#ff6a3d] px-6 text-sm font-medium text-white shadow-sm transition-colors hover:bg-[#e85a2f] disabled:cursor-not-allowed disabled:opacity-60"

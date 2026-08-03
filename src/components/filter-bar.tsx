@@ -44,7 +44,7 @@ export function FilterBar({
           <input
             name="q"
             defaultValue={searchParams.get("q") ?? ""}
-            placeholder="맛집 이름 또는 메모 검색"
+            placeholder="맛집 이름 또는 한줄평 검색"
             className="h-11 w-full rounded-lg border border-black/10 bg-white pl-9 pr-3 text-sm outline-none focus:border-black/30"
           />
         </div>
