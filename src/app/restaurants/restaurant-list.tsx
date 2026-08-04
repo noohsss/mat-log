@@ -113,7 +113,7 @@ export function RestaurantList({
             </Link>
 
             {isOwner ? (
-              <div className="mt-4 flex gap-2 border-t border-black/5 pt-3 text-sm">
+              <div className="mt-4 flex justify-end gap-2 border-t border-black/5 pt-3 text-sm">
                 <Link
                   href={`/restaurants/${r.id}/edit`}
                   className="rounded-full bg-zinc-100 px-3 py-1 font-medium text-zinc-600 transition-colors hover:bg-zinc-200 hover:text-black"
@@ -132,7 +132,7 @@ export function RestaurantList({
               </div>
             ) : (
               currentUserId && (
-                <div className="mt-4 border-t border-black/5 pt-3 text-sm">
+                <div className="mt-4 flex justify-end border-t border-black/5 pt-3 text-sm">
                   <form action={saveRestaurant}>
                     <input type="hidden" name="restaurantId" value={r.id} />
                     <SubmitButton
