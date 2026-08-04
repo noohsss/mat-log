@@ -65,6 +65,23 @@ async function replaceTags(
   if (linkError) throw linkError;
 }
 
+async function uploadRestaurantPhoto(
+  supabase: Awaited<ReturnType<typeof createClient>>,
+  userId: string,
+  restaurantId: string,
+  file: File
+) {
+  const ext = file.name.split(".").pop() || "jpg";
+  const path = `${userId}/${restaurantId}.${ext}`;
+  const { error } = await supabase.storage
+    .from("restaurant-photos")
+    .upload(path, file, { upsert: true, contentType: file.type });
+  if (error) throw error;
+
+  const { data } = supabase.storage.from("restaurant-photos").getPublicUrl(path);
+  return data.publicUrl;
+}
+
 function readForm(formData: FormData) {
   return {
     name: formData.get("name") as string,
@@ -89,18 +106,23 @@ export async function createRestaurant(formData: FormData) {
   const { name, region, food_type, price_range, rating, memo, topicTags, targetTags, visited } =
     readForm(formData);
 
-  const { data, error } = await supabase
+  const id = crypto.randomUUID();
+  const photoFile = formData.get("photo");
+  const photo_url =
+    photoFile instanceof File && photoFile.size > 0
+      ? await uploadRestaurantPhoto(supabase, user.id, id, photoFile)
+      : null;
+
+  const { error } = await supabase
     .from("restaurants")
-    .insert({ user_id: user.id, name, region, food_type, price_range, rating, memo, visited })
-    .select("id")
-    .single();
+    .insert({ id, user_id: user.id, name, region, food_type, price_range, rating, memo, visited, photo_url });
 
   if (error) throw error;
 
   try {
-    await replaceTags(supabase, data.id, topicTags, targetTags);
+    await replaceTags(supabase, id, topicTags, targetTags);
   } catch (tagError) {
-    await supabase.from("restaurants").delete().eq("id", data.id);
+    await supabase.from("restaurants").delete().eq("id", id);
     throw tagError;
   }
 
@@ -118,6 +140,12 @@ export async function updateRestaurant(id: string, formData: FormData) {
   const { name, region, food_type, price_range, rating, memo, topicTags, targetTags, visited } =
     readForm(formData);
 
+  const photoFile = formData.get("photo");
+  const photo_url =
+    photoFile instanceof File && photoFile.size > 0
+      ? await uploadRestaurantPhoto(supabase, user.id, id, photoFile)
+      : undefined;
+
   const { error } = await supabase
     .from("restaurants")
     .update({
@@ -129,6 +157,7 @@ export async function updateRestaurant(id: string, formData: FormData) {
       memo,
       visited,
       updated_at: new Date().toISOString(),
+      ...(photo_url !== undefined ? { photo_url } : {}),
     })
     .eq("id", id)
     .eq("user_id", user.id);
@@ -152,7 +181,7 @@ export async function saveRestaurant(formData: FormData) {
 
   const { data: source, error } = await supabase
     .from("restaurants")
-    .select("name, region, food_type, price_range, restaurant_tags(tag_id)")
+    .select("name, region, food_type, price_range, photo_url, restaurant_tags(tag_id)")
     .eq("id", restaurantId)
     .single();
   if (error || !source) throw error ?? new Error("맛집을 찾을 수 없습니다.");
@@ -165,6 +194,7 @@ export async function saveRestaurant(formData: FormData) {
       region: source.region,
       food_type: source.food_type,
       price_range: source.price_range,
+      photo_url: source.photo_url,
       rating: null,
       memo: null,
       visited: false,

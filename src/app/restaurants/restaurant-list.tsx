@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 import { deleteRestaurant, saveRestaurant } from "./actions";
 import type { RestaurantRow } from "./queries";
 import { SubmitButton } from "@/components/submit-button";
@@ -40,6 +41,15 @@ export function RestaurantList({
             className="rounded-xl border border-black/5 border-l-4 border-l-[#ff6a3d] bg-white p-5 shadow-sm transition-shadow hover:shadow-md"
           >
             <Link href={`/restaurants/${r.id}`} className="flex gap-4">
+              {r.photo_url && (
+                <Image
+                  src={r.photo_url}
+                  alt=""
+                  width={80}
+                  height={80}
+                  className="h-20 w-20 shrink-0 rounded-lg object-cover"
+                />
+              )}
               <div className="min-w-0 flex-1">
                 <div className="flex items-center justify-between">
                   <h2 className="text-lg font-semibold text-[#2b2b2b]">{r.name}</h2>

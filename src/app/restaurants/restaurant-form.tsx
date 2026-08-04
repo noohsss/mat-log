@@ -17,6 +17,7 @@ type RestaurantFormValues = {
   topicTags?: string;
   targetTags?: string;
   visited?: boolean;
+  photoUrl?: string;
 };
 
 export function RestaurantForm({
@@ -43,6 +44,23 @@ export function RestaurantForm({
 
       <Field label="가게명" name="name" defaultValue={initialValues?.name} required />
       <KakaoAddressSearch name="region" defaultValue={initialValues?.region} />
+
+      <label className="flex flex-col gap-1.5 text-sm">
+        <span className="font-medium text-zinc-700">대표사진</span>
+        {initialValues?.photoUrl && (
+          <img
+            src={initialValues.photoUrl}
+            alt=""
+            className="h-32 w-32 rounded-lg object-cover"
+          />
+        )}
+        <input
+          name="photo"
+          type="file"
+          accept="image/*"
+          className="text-sm text-zinc-600 file:mr-3 file:rounded-full file:border-0 file:bg-zinc-100 file:px-4 file:py-2 file:text-sm file:font-medium file:text-zinc-600 hover:file:bg-zinc-200"
+        />
+      </label>
 
       <div className="grid grid-cols-2 gap-4">
         <SelectField

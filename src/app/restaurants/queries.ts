@@ -20,7 +20,7 @@ function restaurantsSelectBuilder(
   return supabase
     .from("restaurants")
     .select(
-      "id, user_id, name, region, food_type, price_range, rating, memo, visited, created_at, users(nickname), restaurant_tags(tags(name, type))",
+      "id, user_id, name, region, food_type, price_range, rating, memo, visited, photo_url, created_at, users(nickname), restaurant_tags(tags(name, type))",
       withCount ? { count: "exact" } : undefined
     );
 }
