@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import Link from "next/link";
 import { recommendWithAi, saveRestaurant } from "@/app/restaurants/actions";
 import type { AiRecommendation } from "@/app/restaurants/ai";
 import { SubmitButton } from "@/components/submit-button";
@@ -96,32 +97,34 @@ export function AiChatWidget() {
                           key={restaurant.id}
                           className="rounded-xl border border-black/5 bg-zinc-50 p-3"
                         >
-                          <div className="flex items-center justify-between">
-                            <h3 className="text-sm font-semibold text-[#2b2b2b]">
-                              {restaurant.name}
-                            </h3>
-                            {restaurant.rating != null && (
-                              <span className="rounded-full bg-[#fff1ea] px-2 py-0.5 text-xs font-medium text-[#e85a2f]">
-                                ★ {restaurant.rating}
-                              </span>
-                            )}
-                          </div>
-                          <div className="mt-1 flex flex-wrap gap-1.5 text-xs font-medium text-zinc-600">
-                            {restaurant.region && (
+                          <Link href={`/restaurants/${restaurant.id}`} className="block">
+                            <div className="flex items-center justify-between">
+                              <h3 className="text-sm font-semibold text-[#2b2b2b]">
+                                {restaurant.name}
+                              </h3>
+                              {restaurant.rating != null && (
+                                <span className="rounded-full bg-[#fff1ea] px-2 py-0.5 text-xs font-medium text-[#e85a2f]">
+                                  ★ {restaurant.rating}
+                                </span>
+                              )}
+                            </div>
+                            <div className="mt-1 flex flex-wrap gap-1.5 text-xs font-medium text-zinc-600">
+                              {restaurant.region && (
+                                <span className="rounded-full bg-zinc-100 px-2 py-0.5">
+                                  {restaurant.region}
+                                </span>
+                              )}
                               <span className="rounded-full bg-zinc-100 px-2 py-0.5">
-                                {restaurant.region}
+                                {restaurant.food_type}
                               </span>
-                            )}
-                            <span className="rounded-full bg-zinc-100 px-2 py-0.5">
-                              {restaurant.food_type}
-                            </span>
-                            <span className="rounded-full bg-zinc-100 px-2 py-0.5">
-                              {restaurant.price_range}
-                            </span>
-                          </div>
-                          <p className="mt-2 text-xs leading-relaxed text-[#e85a2f]">
-                            💡 {reason}
-                          </p>
+                              <span className="rounded-full bg-zinc-100 px-2 py-0.5">
+                                {restaurant.price_range}
+                              </span>
+                            </div>
+                            <p className="mt-2 text-xs leading-relaxed text-[#e85a2f]">
+                              💡 {reason}
+                            </p>
+                          </Link>
                           <form action={saveRestaurant} className="mt-2 border-t border-black/5 pt-2">
                             <input type="hidden" name="restaurantId" value={restaurant.id} />
                             <SubmitButton
@@ -153,7 +156,7 @@ export function AiChatWidget() {
               value={input}
               onChange={(e) => setInput(e.target.value)}
               onKeyDown={(e) => {
-                if (e.key === "Enter") {
+                if (e.key === "Enter" && !e.nativeEvent.isComposing) {
                   e.preventDefault();
                   handleSend();
                 }
