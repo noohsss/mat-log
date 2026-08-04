@@ -145,6 +145,17 @@ export function countAppliedFilters(f: {
   return [f.q, f.topic, f.target, f.foodType, f.region].filter(Boolean).length;
 }
 
+export async function getRestaurantById(id: string): Promise<RestaurantRow | null> {
+  const supabase = await createClient();
+  const { data, error } = await restaurantsSelectBuilder(supabase).eq("id", id).single();
+
+  if (error) {
+    if (error.code === "PGRST116") return null;
+    throw error;
+  }
+  return data;
+}
+
 export async function getFilterOptions() {
   const supabase = await createClient();
 
