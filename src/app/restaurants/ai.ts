@@ -1,10 +1,41 @@
 import { GoogleGenAI, Type } from "@google/genai";
+import { createClient } from "@/lib/supabase/server";
 import { getRestaurants, type RestaurantRow } from "./queries";
 
 const CANDIDATE_LIMIT = 50;
 const MAX_RECOMMENDATIONS = 10;
+const RATE_LIMIT_WINDOW_MS = 60_000;
+const RATE_LIMIT_MAX_REQUESTS = 5;
 
 export class AiRecommendError extends Error {}
+
+async function checkAndConsumeRateLimit(userId: string) {
+  const supabase = await createClient();
+  const { data: row } = await supabase
+    .from("ai_recommendation_limits")
+    .select("window_start, request_count")
+    .eq("user_id", userId)
+    .maybeSingle();
+
+  const now = Date.now();
+  const windowExpired = !row || now - new Date(row.window_start).getTime() > RATE_LIMIT_WINDOW_MS;
+
+  if (windowExpired) {
+    await supabase
+      .from("ai_recommendation_limits")
+      .upsert({ user_id: userId, window_start: new Date(now).toISOString(), request_count: 1 });
+    return;
+  }
+
+  if (row.request_count >= RATE_LIMIT_MAX_REQUESTS) {
+    throw new AiRecommendError("잠시 후 다시 시도해주세요. (분당 요청 제한을 초과했어요)");
+  }
+
+  await supabase
+    .from("ai_recommendation_limits")
+    .update({ request_count: row.request_count + 1 })
+    .eq("user_id", userId);
+}
 
 type TagRow = { tags: { name: string; type: string } | null };
 
@@ -38,6 +69,8 @@ export async function getAiRecommendations(
   if (!apiKey) {
     throw new AiRecommendError("GEMINI_API_KEY가 설정되어 있지 않습니다.");
   }
+
+  if (excludeUserId) await checkAndConsumeRateLimit(excludeUserId);
 
   const candidates = await getRestaurants({ excludeUserId, sort: "latest" });
   if (candidates.length === 0) return [];
