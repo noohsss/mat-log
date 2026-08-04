@@ -2,6 +2,15 @@ import { createClient } from "@/lib/supabase/server";
 import { PAGE_SIZE } from "./constants";
 import type { SortValue } from "./constants";
 
+// region은 카카오 주소 검색으로 채워지는 상세 주소 문자열이라, 필터 옵션은
+// "시/도 + 시/군/구" 단위까지만 잘라서 사용한다 (예: "서울 송파구 오금로 131" → "서울 송파구").
+function extractDistrict(region: string): string {
+  const tokens = region.trim().split(/\s+/);
+  let end = tokens[1] && /(시|군|구|도)$/.test(tokens[1]) ? 2 : 1;
+  if (tokens[1] && /시$/.test(tokens[1]) && tokens[2] && /(구|군)$/.test(tokens[2])) end = 3;
+  return tokens.slice(0, end).join(" ");
+}
+
 export type RestaurantFilters = {
   onlyUserId?: string;
   excludeUserId?: string;
@@ -99,7 +108,7 @@ export async function getRestaurants({
     }
   }
   if (foodType) query = query.eq("food_type", foodType);
-  if (region) query = query.eq("region", region);
+  if (region) query = query.ilike("region", `${region}%`);
   if (q) query = query.or(`name.ilike.%${q}%,memo.ilike.%${q}%`);
 
   if (sort === "rating") {
@@ -164,7 +173,14 @@ export async function getFilterOptions() {
     supabase.from("tags").select("name, type").order("name"),
   ]);
 
-  const regions = [...new Set((regionRows ?? []).map((r) => r.region).filter(Boolean))].sort();
+  const regions = [
+    ...new Set(
+      (regionRows ?? [])
+        .map((r) => r.region)
+        .filter((r): r is string => !!r)
+        .map(extractDistrict)
+    ),
+  ].sort();
   const topics = (tagRows ?? []).filter((t) => t.type === "topic").map((t) => t.name);
   const targets = (tagRows ?? []).filter((t) => t.type === "target").map((t) => t.name);
 
