@@ -5,6 +5,7 @@ import { createClient } from "@/lib/supabase/server";
 import { getRestaurantById } from "../queries";
 import { Logo } from "@/components/logo";
 import { DetailDeleteForm } from "./detail-delete-form";
+import { KakaoMapPreview } from "@/components/kakao-map-preview";
 
 type TagRow = { tags: { name: string; type: string } | null };
 
@@ -99,6 +100,10 @@ export default async function RestaurantDetailPage({
                   {restaurant.memo}
                 </p>
               )
+            )}
+
+            {restaurant.lat != null && restaurant.lng != null && (
+              <KakaoMapPreview lat={restaurant.lat} lng={restaurant.lng} />
             )}
           </div>
 

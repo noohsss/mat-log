@@ -18,6 +18,8 @@ type RestaurantFormValues = {
   targetTags?: string;
   visited?: boolean;
   photoUrl?: string;
+  lat?: number | null;
+  lng?: number | null;
 };
 
 export function RestaurantForm({
@@ -43,7 +45,12 @@ export function RestaurantForm({
       </p>
 
       <Field label="가게명" name="name" defaultValue={initialValues?.name} required />
-      <KakaoAddressSearch name="region" defaultValue={initialValues?.region} />
+      <KakaoAddressSearch
+        name="region"
+        defaultValue={initialValues?.region}
+        defaultLat={initialValues?.lat}
+        defaultLng={initialValues?.lng}
+      />
 
       <label className="flex flex-col gap-1.5 text-sm">
         <span className="font-medium text-zinc-700">대표사진</span>

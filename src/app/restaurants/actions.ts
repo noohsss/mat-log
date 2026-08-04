@@ -83,6 +83,8 @@ async function uploadRestaurantPhoto(
 }
 
 function readForm(formData: FormData) {
+  const lat = formData.get("lat");
+  const lng = formData.get("lng");
   return {
     name: formData.get("name") as string,
     region: formData.get("region") as string,
@@ -93,6 +95,8 @@ function readForm(formData: FormData) {
     topicTags: (formData.get("topicTags") as string) ?? "",
     targetTags: (formData.get("targetTags") as string) ?? "",
     visited: formData.get("visited") === "on",
+    lat: lat ? Number(lat) : null,
+    lng: lng ? Number(lng) : null,
   };
 }
 
@@ -103,7 +107,7 @@ export async function createRestaurant(formData: FormData) {
   } = await supabase.auth.getUser();
   if (!user) redirect("/login");
 
-  const { name, region, food_type, price_range, rating, memo, topicTags, targetTags, visited } =
+  const { name, region, food_type, price_range, rating, memo, topicTags, targetTags, visited, lat, lng } =
     readForm(formData);
 
   const id = crypto.randomUUID();
@@ -115,7 +119,7 @@ export async function createRestaurant(formData: FormData) {
 
   const { error } = await supabase
     .from("restaurants")
-    .insert({ id, user_id: user.id, name, region, food_type, price_range, rating, memo, visited, photo_url });
+    .insert({ id, user_id: user.id, name, region, food_type, price_range, rating, memo, visited, photo_url, lat, lng });
 
   if (error) throw error;
 
@@ -137,7 +141,7 @@ export async function updateRestaurant(id: string, formData: FormData) {
   } = await supabase.auth.getUser();
   if (!user) redirect("/login");
 
-  const { name, region, food_type, price_range, rating, memo, topicTags, targetTags, visited } =
+  const { name, region, food_type, price_range, rating, memo, topicTags, targetTags, visited, lat, lng } =
     readForm(formData);
 
   const photoFile = formData.get("photo");
@@ -156,6 +160,8 @@ export async function updateRestaurant(id: string, formData: FormData) {
       rating,
       memo,
       visited,
+      lat,
+      lng,
       updated_at: new Date().toISOString(),
       ...(photo_url !== undefined ? { photo_url } : {}),
     })
@@ -181,7 +187,7 @@ export async function saveRestaurant(formData: FormData) {
 
   const { data: source, error } = await supabase
     .from("restaurants")
-    .select("name, region, food_type, price_range, photo_url, restaurant_tags(tag_id)")
+    .select("name, region, food_type, price_range, photo_url, lat, lng, restaurant_tags(tag_id)")
     .eq("id", restaurantId)
     .single();
   if (error || !source) throw error ?? new Error("맛집을 찾을 수 없습니다.");
@@ -195,6 +201,8 @@ export async function saveRestaurant(formData: FormData) {
       food_type: source.food_type,
       price_range: source.price_range,
       photo_url: source.photo_url,
+      lat: source.lat,
+      lng: source.lng,
       rating: null,
       memo: null,
       visited: false,

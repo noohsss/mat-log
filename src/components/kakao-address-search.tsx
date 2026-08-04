@@ -1,66 +1,48 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
-
-declare global {
-  interface Window {
-    kakao: any;
-  }
-}
-
-type PlaceResult = {
-  place_name: string;
-  address_name: string;
-  road_address_name?: string;
-};
+import { useState } from "react";
+import { searchKakaoAddress, type KakaoPlace } from "@/lib/kakao";
+import { KakaoMapPreview } from "./kakao-map-preview";
 
 export function KakaoAddressSearch({
   name,
   defaultValue,
+  defaultLat,
+  defaultLng,
 }: {
   name: string;
   defaultValue?: string;
+  defaultLat?: number | null;
+  defaultLng?: number | null;
 }) {
   const [query, setQuery] = useState(defaultValue ?? "");
   const [value, setValue] = useState(defaultValue ?? "");
-  const [results, setResults] = useState<PlaceResult[]>([]);
+  const [results, setResults] = useState<KakaoPlace[]>([]);
   const [open, setOpen] = useState(false);
-  const placesRef = useRef<any>(null);
+  const [pending, setPending] = useState(false);
+  const [coords, setCoords] = useState<{ lat: number; lng: number } | null>(
+    defaultLat != null && defaultLng != null ? { lat: defaultLat, lng: defaultLng } : null
+  );
 
-  useEffect(() => {
-    const appkey = process.env.NEXT_PUBLIC_KAKAO_MAP_KEY;
-    if (!appkey) return;
-
-    if (window.kakao?.maps?.services) {
-      placesRef.current = new window.kakao.maps.services.Places();
-      return;
-    }
-
-    const script = document.createElement("script");
-    script.src = `https://dapi.kakao.com/v2/maps/sdk.js?appkey=${appkey}&libraries=services&autoload=false`;
-    script.async = true;
-    script.onload = () => {
-      window.kakao.maps.load(() => {
-        placesRef.current = new window.kakao.maps.services.Places();
-      });
-    };
-    document.head.appendChild(script);
-  }, []);
-
-  function handleSearch() {
-    if (!placesRef.current || !query.trim()) return;
-    placesRef.current.keywordSearch(query, (data: PlaceResult[], status: string) => {
+  async function handleSearch() {
+    if (!query.trim() || pending) return;
+    setPending(true);
+    try {
+      const places = await searchKakaoAddress(query);
+      setResults(places);
       setOpen(true);
-      setResults(status === window.kakao.maps.services.Status.OK ? data : []);
-    });
+    } finally {
+      setPending(false);
+    }
   }
 
-  function handleSelect(item: PlaceResult) {
+  function handleSelect(item: KakaoPlace) {
     const address = item.road_address_name || item.address_name;
     setValue(address);
     setQuery(address);
     setOpen(false);
     setResults([]);
+    setCoords({ lat: Number(item.y), lng: Number(item.x) });
   }
 
   return (
@@ -86,9 +68,10 @@ export function KakaoAddressSearch({
         <button
           type="button"
           onClick={handleSearch}
-          className="h-11 shrink-0 rounded-lg bg-zinc-100 px-4 text-sm font-medium text-zinc-600 transition-colors hover:bg-zinc-200"
+          disabled={pending}
+          className="h-11 shrink-0 cursor-pointer rounded-lg bg-zinc-100 px-4 text-sm font-medium text-zinc-600 transition-colors hover:bg-zinc-200 disabled:cursor-not-allowed disabled:opacity-60"
         >
-          검색
+          {pending ? "검색 중..." : "검색"}
         </button>
       </div>
 
@@ -117,6 +100,10 @@ export function KakaoAddressSearch({
       )}
 
       <input type="hidden" name={name} value={value} />
+      <input type="hidden" name="lat" value={coords?.lat ?? ""} />
+      <input type="hidden" name="lng" value={coords?.lng ?? ""} />
+
+      {coords && <KakaoMapPreview lat={coords.lat} lng={coords.lng} />}
     </div>
   );
 }

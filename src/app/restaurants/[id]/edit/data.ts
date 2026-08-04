@@ -10,7 +10,7 @@ export async function getEditableRestaurant(id: string) {
 
   const { data: restaurant, error } = await supabase
     .from("restaurants")
-    .select("id, user_id, name, region, food_type, price_range, rating, memo, visited, photo_url")
+    .select("id, user_id, name, region, food_type, price_range, rating, memo, visited, photo_url, lat, lng")
     .eq("id", id)
     .single();
 
@@ -47,6 +47,8 @@ export async function getEditableRestaurant(id: string) {
       targetTags,
       visited: restaurant.visited,
       photoUrl: restaurant.photo_url ?? undefined,
+      lat: restaurant.lat,
+      lng: restaurant.lng,
     },
   };
 }
