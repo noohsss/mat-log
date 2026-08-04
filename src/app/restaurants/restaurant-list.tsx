@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { deleteRestaurant, saveRestaurant } from "./actions";
-import type { getRestaurants } from "./queries";
+import type { RestaurantRow } from "./queries";
 import { SubmitButton } from "@/components/submit-button";
 
 type TagRow = { tags: { name: string; type: string } | null };
@@ -10,7 +10,7 @@ export function RestaurantList({
   currentUserId,
   emptyMessage,
 }: {
-  restaurants: Awaited<ReturnType<typeof getRestaurants>>;
+  restaurants: RestaurantRow[];
   currentUserId?: string;
   emptyMessage: string;
 }) {

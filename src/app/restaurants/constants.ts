@@ -7,3 +7,5 @@ export const SORT_OPTIONS = [
 ] as const;
 
 export type SortValue = (typeof SORT_OPTIONS)[number]["value"];
+
+export const PAGE_SIZE = 12;

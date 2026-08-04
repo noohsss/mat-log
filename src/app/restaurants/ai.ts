@@ -1,5 +1,5 @@
 import { GoogleGenAI, Type } from "@google/genai";
-import { getRestaurants } from "./queries";
+import { getRestaurants, type RestaurantRow } from "./queries";
 
 const CANDIDATE_LIMIT = 50;
 const MAX_RECOMMENDATIONS = 10;
@@ -9,11 +9,11 @@ export class AiRecommendError extends Error {}
 type TagRow = { tags: { name: string; type: string } | null };
 
 export type AiRecommendation = {
-  restaurant: Awaited<ReturnType<typeof getRestaurants>>[number];
+  restaurant: RestaurantRow;
   reason: string;
 };
 
-function toCandidateSummary(restaurant: Awaited<ReturnType<typeof getRestaurants>>[number]) {
+function toCandidateSummary(restaurant: RestaurantRow) {
   const tags = (restaurant.restaurant_tags as unknown as TagRow[])
     .map((t) => t.tags)
     .filter((t): t is { name: string; type: string } => !!t);

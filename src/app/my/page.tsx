@@ -10,10 +10,12 @@ import {
   countAppliedFilters,
   type SearchParams,
 } from "../restaurants/queries";
+import { PAGE_SIZE } from "../restaurants/constants";
 import { RestaurantList } from "../restaurants/restaurant-list";
 import { Logo } from "@/components/logo";
 import { BoardTabs } from "@/components/board-tabs";
 import { FilterBar } from "@/components/filter-bar";
+import { Pagination } from "@/components/pagination";
 
 export default async function MyRestaurantsPage({
   searchParams,
@@ -27,7 +29,7 @@ export default async function MyRestaurantsPage({
   if (!user) redirect("/login");
 
   const filters = parseFilters(await searchParams);
-  const [restaurants, { regions, topics, targets }] = await Promise.all([
+  const [{ data: restaurants, count }, { regions, topics, targets }] = await Promise.all([
     getRestaurants({ ...filters, onlyUserId: user.id }),
     getFilterOptions(),
   ]);
@@ -65,7 +67,7 @@ export default async function MyRestaurantsPage({
             regions={regions}
             topics={topics}
             targets={targets}
-            totalCount={restaurants.length}
+            totalCount={count}
             appliedCount={countAppliedFilters(filters)}
           />
         </Suspense>
@@ -75,6 +77,10 @@ export default async function MyRestaurantsPage({
           currentUserId={user.id}
           emptyMessage="조건에 맞는 맛집이 없어요."
         />
+
+        <Suspense>
+          <Pagination page={filters.page} pageSize={PAGE_SIZE} totalCount={count} />
+        </Suspense>
       </main>
     </div>
   );

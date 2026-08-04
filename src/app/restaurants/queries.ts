@@ -1,4 +1,5 @@
 import { createClient } from "@/lib/supabase/server";
+import { PAGE_SIZE } from "./constants";
 import type { SortValue } from "./constants";
 
 export type RestaurantFilters = {
@@ -12,6 +13,33 @@ export type RestaurantFilters = {
   sort?: SortValue;
 };
 
+function restaurantsSelectBuilder(
+  supabase: Awaited<ReturnType<typeof createClient>>,
+  withCount?: boolean
+) {
+  return supabase
+    .from("restaurants")
+    .select(
+      "id, user_id, name, region, food_type, price_range, rating, memo, visited, created_at, users(nickname), restaurant_tags(tags(name, type))",
+      withCount ? { count: "exact" } : undefined
+    );
+}
+
+export type RestaurantRow = NonNullable<
+  Awaited<ReturnType<typeof restaurantsSelectBuilder>>["data"]
+>[number];
+
+export type RestaurantPage = {
+  data: RestaurantRow[];
+  count: number;
+};
+
+export async function getRestaurants(
+  filters?: RestaurantFilters & { page?: undefined }
+): Promise<RestaurantRow[]>;
+export async function getRestaurants(
+  filters: RestaurantFilters & { page: number }
+): Promise<RestaurantPage>;
 export async function getRestaurants({
   onlyUserId,
   excludeUserId,
@@ -21,7 +49,8 @@ export async function getRestaurants({
   foodType,
   region,
   sort,
-}: RestaurantFilters = {}) {
+  page,
+}: RestaurantFilters & { page?: number } = {}) {
   const supabase = await createClient();
 
   // Filtering by topic AND target tags can't be done with a single embedded
@@ -47,14 +76,10 @@ export async function getRestaurants({
     }
 
     tagFilterIds = [...idSets.reduce((a, b) => new Set([...a].filter((id) => b.has(id))))];
-    if (tagFilterIds.length === 0) return [];
+    if (tagFilterIds.length === 0) return page !== undefined ? { data: [], count: 0 } : [];
   }
 
-  let query = supabase
-    .from("restaurants")
-    .select(
-      "id, user_id, name, region, food_type, price_range, rating, memo, visited, created_at, users(nickname), restaurant_tags(tags(name, type))"
-    );
+  let query = restaurantsSelectBuilder(supabase, page !== undefined);
 
   if (tagFilterIds) query = query.in("id", tagFilterIds);
   if (onlyUserId) query = query.eq("user_id", onlyUserId);
@@ -83,16 +108,22 @@ export async function getRestaurants({
     query = query.order("created_at", { ascending: false });
   }
 
-  const { data, error } = await query;
+  if (page !== undefined) {
+    const from = (page - 1) * PAGE_SIZE;
+    query = query.range(from, from + PAGE_SIZE - 1);
+  }
+
+  const { data, error, count } = await query;
 
   if (error) throw error;
-  return data;
+  return page !== undefined ? { data: data ?? [], count: count ?? 0 } : data;
 }
 
 export type SearchParams = { [key: string]: string | string[] | undefined };
 
 export function parseFilters(sp: SearchParams) {
   const get = (key: string) => (typeof sp[key] === "string" ? (sp[key] as string) : undefined);
+  const pageRaw = Number(get("page"));
   return {
     q: get("q"),
     topic: get("topic"),
@@ -100,6 +131,7 @@ export function parseFilters(sp: SearchParams) {
     foodType: get("foodType"),
     region: get("region"),
     sort: get("sort") as SortValue | undefined,
+    page: Number.isInteger(pageRaw) && pageRaw > 0 ? pageRaw : 1,
   };
 }
 
