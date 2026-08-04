@@ -2,6 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { SubmitButton } from "@/components/submit-button";
+import { KakaoAddressSearch } from "@/components/kakao-address-search";
 
 const FOOD_TYPES = ["한식", "중식", "일식", "양식", "카페·디저트", "술집·바", "기타"];
 const PRICE_RANGES = ["저렴", "보통", "비쌈"];
@@ -41,12 +42,7 @@ export function RestaurantForm({
       </p>
 
       <Field label="가게명" name="name" defaultValue={initialValues?.name} required />
-      <Field
-        label="지역·위치"
-        name="region"
-        defaultValue={initialValues?.region}
-        placeholder="예: 서울 마포구"
-      />
+      <KakaoAddressSearch name="region" defaultValue={initialValues?.region} />
 
       <div className="grid grid-cols-2 gap-4">
         <SelectField
