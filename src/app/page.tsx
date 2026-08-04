@@ -14,7 +14,7 @@ import { RestaurantList } from "./restaurants/restaurant-list";
 import { Logo } from "@/components/logo";
 import { BoardTabs } from "@/components/board-tabs";
 import { FilterBar } from "@/components/filter-bar";
-import { AiSearchBar } from "@/components/ai-search-bar";
+import { AiChatWidget } from "@/components/ai-chat-widget";
 import { Pagination } from "@/components/pagination";
 
 export default async function Home({
@@ -61,8 +61,6 @@ export default async function Home({
           </Link>
         </div>
 
-        <AiSearchBar />
-
         <Suspense>
           <FilterBar
             regions={regions}
@@ -83,6 +81,8 @@ export default async function Home({
           <Pagination page={filters.page} pageSize={PAGE_SIZE} totalCount={count} />
         </Suspense>
       </main>
+
+      <AiChatWidget />
     </div>
   );
 }

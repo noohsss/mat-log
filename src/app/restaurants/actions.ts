@@ -223,17 +223,14 @@ export type AiRecommendState = {
   error: string | null;
 };
 
-export async function recommendWithAi(
-  _prevState: AiRecommendState,
-  formData: FormData
-): Promise<AiRecommendState> {
+export async function recommendWithAi(rawQuery: string): Promise<AiRecommendState> {
   const supabase = await createClient();
   const {
     data: { user },
   } = await supabase.auth.getUser();
   if (!user) redirect("/login");
 
-  const query = ((formData.get("query") as string) ?? "").trim();
+  const query = rawQuery.trim();
   if (!query) {
     return { results: [], error: "찾고 싶은 맛집을 자연어로 입력해주세요." };
   }
