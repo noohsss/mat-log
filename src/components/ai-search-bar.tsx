@@ -1,7 +1,8 @@
 "use client";
 
 import { useActionState, useState } from "react";
-import { recommendWithAi, type AiRecommendState } from "@/app/restaurants/actions";
+import { recommendWithAi, saveRestaurant, type AiRecommendState } from "@/app/restaurants/actions";
+import { SubmitButton } from "@/components/submit-button";
 
 const initialState: AiRecommendState = { results: [], error: null };
 
@@ -68,6 +69,15 @@ export function AiSearchBar() {
                     </span>
                   </div>
                   <p className="mt-3 text-sm leading-relaxed text-[#e85a2f]">💡 {reason}</p>
+                  <form action={saveRestaurant} className="mt-3 border-t border-black/5 pt-3">
+                    <input type="hidden" name="restaurantId" value={restaurant.id} />
+                    <SubmitButton
+                      pendingLabel="저장 중..."
+                      className="rounded-full bg-[#fff1ea] px-3 py-1 text-sm font-medium text-[#ff6a3d] transition-colors hover:bg-[#ffe3d3]"
+                    >
+                      저장
+                    </SubmitButton>
+                  </form>
                 </li>
               ))}
             </ul>
