@@ -13,6 +13,7 @@ import { RestaurantList } from "./restaurants/restaurant-list";
 import { Logo } from "@/components/logo";
 import { BoardTabs } from "@/components/board-tabs";
 import { FilterBar } from "@/components/filter-bar";
+import { AiSearchBar } from "@/components/ai-search-bar";
 
 export default async function Home({
   searchParams,
@@ -57,6 +58,8 @@ export default async function Home({
             + 맛집 등록
           </Link>
         </div>
+
+        <AiSearchBar />
 
         <Suspense>
           <FilterBar

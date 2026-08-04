@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
+import { getAiRecommendations, AiRecommendError, type AiRecommendation } from "./ai";
 
 function parseTags(input: string) {
   return input
@@ -185,6 +186,36 @@ export async function saveRestaurant(formData: FormData) {
 
   revalidatePath("/");
   revalidatePath("/my");
+}
+
+export type AiRecommendState = {
+  results: AiRecommendation[];
+  error: string | null;
+};
+
+export async function recommendWithAi(
+  _prevState: AiRecommendState,
+  formData: FormData
+): Promise<AiRecommendState> {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) redirect("/login");
+
+  const query = ((formData.get("query") as string) ?? "").trim();
+  if (!query) {
+    return { results: [], error: "찾고 싶은 맛집을 자연어로 입력해주세요." };
+  }
+
+  try {
+    const results = await getAiRecommendations(query, user.id);
+    return { results, error: null };
+  } catch (e) {
+    const message =
+      e instanceof AiRecommendError ? e.message : "추천을 가져오지 못했어요. 잠시 후 다시 시도해주세요.";
+    return { results: [], error: message };
+  }
 }
 
 export async function deleteRestaurant(formData: FormData) {
