@@ -9,7 +9,7 @@ export function DetailDeleteForm({ id }: { id: string }) {
 
   async function handleDelete(formData: FormData) {
     await deleteRestaurant(formData);
-    router.push("/");
+    router.back();
   }
 
   return (
