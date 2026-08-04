@@ -45,7 +45,7 @@ export default async function RestaurantDetailPage({
 
         <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
           <div className="flex flex-col gap-4 rounded-xl border border-black/5 bg-white p-6 shadow-sm md:col-span-2">
-            {restaurant.photo_url && (
+            {restaurant.photo_url ? (
               <Image
                 src={restaurant.photo_url}
                 alt=""
@@ -53,6 +53,10 @@ export default async function RestaurantDetailPage({
                 height={360}
                 className="h-64 w-full rounded-lg object-cover"
               />
+            ) : (
+              <div className="flex h-64 w-full items-center justify-center rounded-lg bg-zinc-100 text-sm text-zinc-400">
+                사진 없음
+              </div>
             )}
 
             <div className="flex items-center justify-between">

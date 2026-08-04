@@ -41,7 +41,7 @@ export function RestaurantList({
             className="rounded-xl border border-black/5 border-l-4 border-l-[#ff6a3d] bg-white p-5 shadow-sm transition-shadow hover:shadow-md"
           >
             <Link href={`/restaurants/${r.id}`} className="flex gap-4">
-              {r.photo_url && (
+              {r.photo_url ? (
                 <Image
                   src={r.photo_url}
                   alt=""
@@ -49,6 +49,10 @@ export function RestaurantList({
                   height={80}
                   className="h-20 w-20 shrink-0 rounded-lg object-cover"
                 />
+              ) : (
+                <div className="flex h-20 w-20 shrink-0 items-center justify-center rounded-lg bg-zinc-100 text-xs text-zinc-400">
+                  사진 없음
+                </div>
               )}
               <div className="min-w-0 flex-1">
                 <div className="flex items-center justify-between">
