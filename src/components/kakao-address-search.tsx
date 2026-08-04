@@ -66,6 +66,7 @@ export function KakaoAddressSearch({
   return (
     <div className="relative flex flex-col gap-1.5 text-sm">
       <span className="font-medium text-zinc-700">지역·위치</span>
+      <p className="text-xs text-zinc-400">검색 결과는 도로명 주소까지 나와요.</p>
       <div className="flex gap-2">
         <input
           value={query}
